@@ -1,0 +1,293 @@
+{
+  "_description": "Configuration 2: Partial Blown Lift (Dual Motor DEP)",
+  "_version": "1.0.0",
+  "_architecture": "12 High-Lift Motors (battery, inboard) + 2 Cruise Motors (GT+EM parallel, wingtip)",
+  "_units": "Imperial (lb, ft, kts, HP) unless otherwise noted",
+  "_power_flow": {
+    "high_lift_motors": "Battery \u2192 12 motors (takeoff, climb, landing only)",
+    "cruise_motors": "GT + EM (parallel) \u2192 2 motors (all phases)"
+  },
+  "aerodynamics": {
+    "aspect_ratio": 11.8,
+    "oswald_efficiency": 0.8,
+    "zero_lift_drag_coefficient": 0.025,
+    "CLmax_clean": 2.2,
+    "CLmax_takeoff": 2.0,
+    "CLmax_landing": 2.8,
+    "CLmax_climb": 2.0,
+    "_note": "High CLmax values augmented by blown lift from 12 high-lift motors"
+  },
+  "propulsion": {
+    "number_of_engines": 2,
+    "propeller_efficiency": 0.85,
+    "sfc_cruise_lb_per_lb_per_hr": 0.5,
+    "_note": "2 cruise motors are parallel hybrid (GT + EM on each shaft)"
+  },
+  "hybrid_system": {
+    "battery": {
+      "specific_energy_Wh_kg": 250,
+      "specific_power_kW_kg": 1.0,
+      "SOC_margin_percent": 20,
+      "depth_of_discharge_percent": 80,
+      "sizing_margin": 1.2,
+      "_note": "Battery powers high-lift motors and supplements cruise motors during peaks"
+    },
+    "electric_motor": {
+      "efficiency": 0.95,
+      "specific_power_kW_kg": 5.0,
+      "specific_power_W_kg_legacy": 5000,
+      "_note": "Both high-lift and cruise motors"
+    },
+    "inverter": {
+      "efficiency": 0.97
+    },
+    "gas_turbine": {
+      "specific_power_kW_kg": 3.31,
+      "efficiency": 0.211,
+      "BSFC_kg_kWh": 0.398,
+      "_note": "Two gas turbines (one per cruise motor shaft) for sustained cruise power"
+    },
+    "generator": {
+      "specific_power_kW_kg": 5.92,
+      "efficiency": 0.95,
+      "_note": "Not used in parallel hybrid configuration"
+    }
+  },
+  "dep_system": {
+    "enabled": true,
+    "description": "Distributed Electric Propulsion: 12 electric high-lift (inboard) + 2 parallel hybrid cruise (outboard)",
+    "architecture": "dual_motor_hybrid",
+    "number_of_highlift_motors": 12,
+    "blown_span_fraction": 0.65,
+    "motor_power_kW": 10.5,
+    "propeller_diameter_ft": 1.9,
+    "weight_per_motor_lb": 2.2,
+    "wiring_weight_factor": 0.15,
+    "wing_structure_factor": 1.0,
+    "lift_augmentation_factor_max": 1.8,
+    "use_for_wing_sizing": true,
+    "wing_sizing_description": "When true, wing area is sized assuming blown lift is available for takeoff/landing, resulting in smaller cruise-optimized wing",
+    "highlift_motors": {
+      "number_of_motors": 12,
+      "location": "inboard_wing",
+      "power_per_motor_kW": 10.5,
+      "propeller_diameter_ft": 1.9,
+      "weight_per_motor_lb": 2.2,
+      "specific_power_kW_kg": 5.0,
+      "efficiency": 0.95,
+      "blown_span_fraction": 0.65,
+      "lift_augmentation_factor_max": 1.8,
+      "use_for_wing_sizing": true,
+      "active_phases": [
+        "takeoff",
+        "climb",
+        "landing"
+      ],
+      "folding": {
+        "can_fold": true,
+        "folded_drag_coefficient_increment": 0.001,
+        "fold_time_seconds": 10,
+        "_note": "High-lift motors fold during cruise to minimize drag"
+      },
+      "_total_power": "12 \u00d7 10.5 kW = 126 kW"
+    },
+    "cruise_motors": {
+      "number_of_motors": 2,
+      "location": "wingtip",
+      "architecture": "parallel_hybrid",
+      "sizing_method": "from_cruise_requirement",
+      "propeller_diameter_ft": 7.5,
+      "weight_per_motor_lb": "calculated",
+      "specific_power_kW_kg": 5.0,
+      "efficiency": 0.95,
+      "propeller_efficiency": 0.85,
+      "active_phases": [
+        "all"
+      ],
+      "gas_turbine": {
+        "per_motor": "One GT per cruise motor shaft",
+        "provides": "Sustained cruise power"
+      },
+      "electric_motor": {
+        "per_motor": "One EM per cruise motor shaft (parallel with GT)",
+        "provides": "Power boost during high-demand phases"
+      },
+      "wingtip_benefits": {
+        "induced_drag_reduction": 0.05,
+        "description": "Wingtip propellers recover vortex energy"
+      },
+      "_note": "Each cruise motor has GT + EM in parallel on same shaft"
+    },
+    "power_architecture": {
+      "type": "parallel_hybrid",
+      "description": "GT + EM (parallel) \u2192 Cruise motors (all phases), Battery \u2192 High-lift motors (takeoff/landing only)",
+      "cruise_motors": "Parallel hybrid (GT + EM on same shaft)",
+      "highlift_motors": "Pure electric (battery only)"
+    },
+    "wiring_and_controls": {
+      "wiring_weight_factor": 0.15,
+      "controller_weight_per_kW": 0.1,
+      "cooling_weight_factor": 0.05
+    }
+  },
+  "mission_requirements": {
+    "design_range_nm": 400,
+    "cruise_speed_kts": 200,
+    "payload_weight_lb": 6000,
+    "cruise_altitude_ft": 15000,
+    "service_ceiling_ft": 25000,
+    "_note": "Cruise motors use fuel for sustained power; high-lift motors battery-only"
+  },
+  "performance_requirements": {
+    "balanced_field_length_ft": 2600,
+    "landing_field_length_ft": 2600,
+    "rate_of_climb_sea_level_fpm": 1200,
+    "rate_of_climb_ceiling_fpm": 100,
+    "climb_gradient_OEI": 0.024,
+    "climb_gradient_AEO": 0.05,
+    "stall_speed_requirement_kts": 74,
+    "bank_angle_deg": 20,
+    "_note": "Tight requirements enabled by blown lift from 12 high-lift motors"
+  },
+  "hybridization_profile": {
+    "description": "Electric power fraction for cruise motors (0.0=GT only, 1.0=max EM boost). High-lift motors always battery-powered.",
+    "_note": "Cruise motors are parallel hybrid; high-lift motors always electric",
+    "warmup_takeoff": 0.3,
+    "climb": 0.2,
+    "cruise": 0.0,
+    "descent": 0.0,
+    "landing": 0.2,
+    "_explanation": {
+      "cruise_motors": "GT provides base power, EM adds boost during peaks",
+      "highlift_motors": "Always battery-powered (126 kW) when active"
+    }
+  },
+  "mission_segments": {
+    "warmup_takeoff": {
+      "weight_fraction": 0.98,
+      "duration_hr": 0.05,
+      "duration_factor": 1.0
+    },
+    "climb": {
+      "weight_fraction": 0.995,
+      "duration_factor": 1.5
+    },
+    "cruise": {
+      "duration_factor": 10.0
+    },
+    "descent": {
+      "weight_fraction": 1.0,
+      "duration_hr": 0.17,
+      "duration_factor": 1.0
+    },
+    "landing": {
+      "weight_fraction": 0.995,
+      "duration_hr": 0.05,
+      "duration_factor": 0.5
+    }
+  },
+  "fuel_fractions": {
+    "reserve_fuel_fraction": 0.05,
+    "trapped_fuel_fraction": 0.01,
+    "_note": "Fuel system for cruise motor gas turbines"
+  },
+  "weight_iteration": {
+    "initial_TOGW_guess_lb": 12000,
+    "max_iterations": 100,
+    "convergence_tolerance_lb": 5.0,
+    "_note": "Moderate initial guess - hybrid configuration with fuel + battery"
+  },
+  "atmospheric_conditions": {
+    "density_sea_level_slug_ft3": 0.002377,
+    "thrust_lapse": {
+      "alpha_cruise": 0.75,
+      "alpha_ceiling": 0.5,
+      "alpha_turn": 0.75
+    }
+  },
+  "geometry": {
+    "fuselage": {
+      "diameter_ft": 7.0,
+      "length_to_diameter_ratio": 10
+    },
+    "wing": {
+      "dihedral_deg": 5,
+      "taper_ratio": 0.45,
+      "weight_fraction_TOGW": 0.23
+    },
+    "tail": {
+      "horizontal_volume_coefficient": 0.7,
+      "vertical_volume_coefficient": 0.04
+    },
+    "control_surfaces": {
+      "aileron_area_fraction": 0.15,
+      "flap_area_fraction": 0.25,
+      "elevator_area_fraction": 0.4,
+      "rudder_area_fraction": 0.35
+    }
+  },
+  "constraint_analysis": {
+    "climb_speed_multiplier": 1.2,
+    "stall_margin": 1.2
+  },
+  "constants": {
+    "gravity_ft_s2": 32.2,
+    "nm_to_ft": 6076.12,
+    "kts_to_fps": 1.68781
+  },
+  "power_profile_notes": {
+    "takeoff": {
+      "highlift_motors": "126 kW from battery (12 \u00d7 10.5 kW)",
+      "cruise_motors": "~500 kW from GT + EM parallel (30% EM boost)",
+      "total": "626 kW"
+    },
+    "climb": {
+      "highlift_motors": "126 kW from battery",
+      "cruise_motors": "~500 kW from GT + EM parallel (20% EM boost)",
+      "total": "626 kW"
+    },
+    "cruise": {
+      "highlift_motors": "0 kW (FOLDED)",
+      "cruise_motors": "~500 kW from GT only (no EM boost)",
+      "total": "500 kW"
+    },
+    "landing": {
+      "highlift_motors": "126 kW from battery",
+      "cruise_motors": "~250 kW from GT + EM parallel (20% EM boost)",
+      "total": "376 kW"
+    }
+  },
+  "battery_sizing_notes": {
+    "description": "Battery provides power for high-lift motors and boost for cruise motors",
+    "energy_requirements": [
+      "High-lift: 126 kW \u00d7 (t_takeoff + t_climb + t_landing)",
+      "Cruise motor boost: EM power during takeoff/climb/landing",
+      "Total much less than pure electric (GT provides cruise base power)"
+    ],
+    "power_requirements": [
+      "Peak: ~150-200 kW for cruise motor boost + 126 kW for high-lift",
+      "Battery sized by power (not energy-limited due to fuel for cruise)"
+    ]
+  },
+  "design_notes": {
+    "advantages": [
+      "Maximum blown lift effect (smallest possible wing)",
+      "Wingtip cruise motors recover vortex energy",
+      "Folding high-lift motors reduce cruise drag",
+      "GT provides sustained cruise power (good range)",
+      "Battery much smaller than pure electric (only for high-lift + boost)",
+      "Fuel-efficient cruise (GT-only, no battery drain)"
+    ],
+    "disadvantages": [
+      "14 total motors (12 + 2) = high complexity",
+      "Two gas turbines (one per cruise motor) add weight",
+      "Parallel hybrid per cruise motor adds complexity",
+      "Requires fuel system + battery system"
+    ],
+    "best_for": "Medium range regional transport (300-400 nm) with blown lift efficiency and hybrid power",
+    "comparison_to_others": {
+      "vs_config_1_series": "No generator (lighter), but 2 GTs on cruise motors instead",
+      "vs_config_3_multi_engine": "Smaller wing (blown lift), but more complex motor system"
+    }
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "_description": "Configuration 1: Series Electric Full Blown Lift",
+  "_version": "1.0.0",
+  "_architecture": "GT → Generator → DC Bus ←→ Battery → All Motors (with blown lift)",
+  "_units": "Imperial (lb, ft, kts, HP) unless otherwise noted",
+
+  "aerodynamics": {
+    "aspect_ratio": 11.8,
+    "oswald_efficiency": 0.8,
+    "zero_lift_drag_coefficient": 0.025,
+    "CLmax_clean": 2.2,
+    "CLmax_takeoff": 2.0,
+    "CLmax_landing": 2.8,
+    "CLmax_climb": 2.0,
+    "_note": "High CLmax values augmented by blown lift from all motors"
+  },
+
+  "propulsion": {
+    "number_of_engines": 2,
+    "propeller_efficiency": 0.8,
+    "sfc_cruise_lb_per_lb_per_hr": 0.5,
+    "_note": "Modeled as 2 engines for OEI constraints (GT is effectively primary, backup is battery)"
+  },
+
+  "hybrid_system": {
+    "battery": {
+      "specific_energy_Wh_kg": 250,
+      "specific_power_kW_kg": 1.0,
+      "SOC_margin_percent": 20,
+      "depth_of_discharge_percent": 80,
+      "sizing_margin": 1.2,
+      "_note": "Battery provides boost during high-power phases"
+    },
+    "electric_motor": {
+      "efficiency": 0.95,
+      "specific_power_kW_kg": 5.92,
+      "specific_power_W_kg_legacy": 5000,
+      "_note": "All propulsion motors (all contribute to blown lift)"
+    },
+    "inverter": {
+      "efficiency": 0.97
+    },
+    "gas_turbine": {
+      "specific_power_kW_kg": 3.31,
+      "efficiency": 0.211,
+      "BSFC_kg_kWh": 0.398,
+      "_note": "Powers generator, not propeller directly"
+    },
+    "generator": {
+      "specific_power_kW_kg": 5.92,
+      "efficiency": 0.95,
+      "_note": "Sized for 100% of cruise power (continuous operation)"
+    }
+  },
+
+  "dep_system": {
+    "enabled": true,
+    "description": "All motors contribute to blown lift augmentation",
+    "architecture": "series_hybrid",
+    "number_of_highlift_motors": 12,
+    "blown_span_fraction": 0.65,
+    "motor_power_kW": 10.5,
+    "propeller_diameter_ft": 1.9,
+    "weight_per_motor_lb": 2.2,
+    "wiring_weight_factor": 0.15,
+    "wing_structure_factor": 1.0,
+    "lift_augmentation_factor_max": 1.8,
+    "use_for_wing_sizing": true,
+    "_note": "All motors participate in blown lift, not just dedicated high-lift motors"
+  },
+
+  "mission_requirements": {
+    "design_range_nm": 400,
+    "cruise_speed_kts": 200,
+    "payload_weight_lb": 6000,
+    "cruise_altitude_ft": 15000,
+    "service_ceiling_ft": 25000
+  },
+
+  "performance_requirements": {
+    "balanced_field_length_ft": 3300,
+    "landing_field_length_ft": 3000,
+    "rate_of_climb_sea_level_fpm": 1200,
+    "rate_of_climb_ceiling_fpm": 100,
+    "climb_gradient_OEI": 0.024,
+    "climb_gradient_AEO": 0.05,
+    "stall_speed_requirement_kts": 74,
+    "bank_angle_deg": 20,
+    "_note": "Tight requirements enabled by blown lift"
+  },
+
+  "hybridization_profile": {
+    "description": "Electric power fraction for each mission segment (0.0=generator only, 1.0=max battery boost)",
+    "_architecture_note": "Generator provides base power; battery supplements during peaks",
+    "warmup_takeoff": 0.5,
+    "climb": 0.3,
+    "cruise": 0.0,
+    "descent": 0.0,
+    "landing": 0.3,
+    "_explanation": {
+      "takeoff": "50% battery boost above generator power",
+      "climb": "30% battery boost above generator power",
+      "cruise": "Generator only (no battery discharge)",
+      "landing": "30% battery boost for safety margin"
+    }
+  },
+
+  "mission_segments": {
+    "warmup_takeoff": {
+      "weight_fraction": 0.98,
+      "duration_hr": 0.05,
+      "duration_factor": 1.0
+    },
+    "climb": {
+      "weight_fraction": 0.995,
+      "duration_factor": 1.5
+    },
+    "cruise": {
+      "duration_factor": 10.0
+    },
+    "descent": {
+      "weight_fraction": 1.0,
+      "duration_hr": 0.17,
+      "duration_factor": 1.0
+    },
+    "landing": {
+      "weight_fraction": 0.995,
+      "duration_hr": 0.05,
+      "duration_factor": 0.5
+    }
+  },
+
+  "fuel_fractions": {
+    "reserve_fuel_fraction": 0.05,
+    "trapped_fuel_fraction": 0.01
+  },
+
+  "weight_iteration": {
+    "initial_TOGW_guess_lb": 12000,
+    "max_iterations": 100,
+    "convergence_tolerance_lb": 5.0,
+    "_note": "Higher initial guess due to generator and battery weight"
+  },
+
+  "atmospheric_conditions": {
+    "density_sea_level_slug_ft3": 0.002377,
+    "thrust_lapse": {
+      "alpha_cruise": 0.75,
+      "alpha_ceiling": 0.5,
+      "alpha_turn": 0.75
+    }
+  },
+
+  "geometry": {
+    "fuselage": {
+      "diameter_ft": 7.0,
+      "length_to_diameter_ratio": 10
+    },
+    "wing": {
+      "dihedral_deg": 5,
+      "taper_ratio": 0.45,
+      "weight_fraction_TOGW": 0.23
+    },
+    "tail": {
+      "horizontal_volume_coefficient": 0.7,
+      "vertical_volume_coefficient": 0.04
+    },
+    "control_surfaces": {
+      "aileron_area_fraction": 0.15,
+      "flap_area_fraction": 0.25,
+      "elevator_area_fraction": 0.4,
+      "rudder_area_fraction": 0.35
+    }
+  },
+
+  "constraint_analysis": {
+    "climb_speed_multiplier": 1.2,
+    "stall_margin": 1.2
+  },
+
+  "constants": {
+    "gravity_ft_s2": 32.2,
+    "nm_to_ft": 6076.12,
+    "kts_to_fps": 1.68781
+  },
+
+  "design_notes": {
+    "advantages": [
+      "Generator provides continuous power (no battery depletion)",
+      "Blown lift enables 50% smaller wing",
+      "Good for longer ranges",
+      "Flexible power management"
+    ],
+    "disadvantages": [
+      "Generator adds ~1000 lb weight",
+      "Higher complexity than pure electric",
+      "Continuous fuel burn even in cruise"
+    ],
+    "best_for": "Medium to long range missions (300-500+ nm) with sustained power needs"
+  }
+}

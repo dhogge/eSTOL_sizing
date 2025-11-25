@@ -1,0 +1,228 @@
+{
+  "_description": "Multi-Engine Turboprop Configuration - Parallel Electric with 2 Turboprops",
+  "_version": "1.0.0",
+  "_units": "Imperial (lb, ft, kts, HP) unless otherwise noted",
+  "_architecture": "2 independent turboprops, each with parallel hybrid (GT + EM on same shaft)",
+  "aerodynamics": {
+    "aspect_ratio": 11.8,
+    "oswald_efficiency": 0.8,
+    "zero_lift_drag_coefficient": 0.025,
+    "CLmax_clean": 1.6,
+    "CLmax_takeoff": 2.0,
+    "CLmax_landing": 2.4,
+    "CLmax_climb": 1.8,
+    "_note": "Lower CLmax values (no blown lift) - conventional high-lift devices only"
+  },
+  "propulsion": {
+    "number_of_engines": 2,
+    "propeller_efficiency": 0.85,
+    "sfc_cruise_lb_per_lb_per_hr": 0.5,
+    "_note": "2 independent turboprops, each sized for 50% of total power"
+  },
+  "hybrid_system": {
+    "battery": {
+      "specific_energy_Wh_kg": 250,
+      "specific_power_kW_kg": 1.0,
+      "SOC_margin_percent": 20,
+      "depth_of_discharge_percent": 80,
+      "sizing_margin": 1.2
+    },
+    "electric_motor": {
+      "efficiency": 0.95,
+      "specific_power_kW_kg": 5.92,
+      "specific_power_W_kg_legacy": 5000,
+      "_note": "One motor per turboprop shaft for parallel hybrid assist"
+    },
+    "inverter": {
+      "efficiency": 0.97
+    },
+    "gas_turbine": {
+      "specific_power_kW_kg": 3.31,
+      "efficiency": 0.211,
+      "BSFC_kg_kWh": 0.398,
+      "_note": "Turboprop engine (one per nacelle)"
+    },
+    "generator": {
+      "specific_power_kW_kg": 5.92,
+      "efficiency": 0.95,
+      "_note": "Not used in parallel architecture"
+    }
+  },
+  "dep_system": {
+    "enabled": false,
+    "description": "DEP disabled - using conventional twin turboprop configuration",
+    "architecture": "multi_engine",
+    "number_of_highlift_motors": 0,
+    "blown_span_fraction": 0.0,
+    "motor_power_kW": 0.0,
+    "propeller_diameter_ft": 0.0,
+    "weight_per_motor_lb": 0.0,
+    "wiring_weight_factor": 0.0,
+    "wing_structure_factor": 1.0,
+    "lift_augmentation_factor_max": 1.0,
+    "use_for_wing_sizing": false
+  },
+  "mission_requirements": {
+    "design_range_nm": 400,
+    "cruise_speed_kts": 200,
+    "payload_weight_lb": 6000,
+    "cruise_altitude_ft": 15000,
+    "service_ceiling_ft": 25000
+  },
+  "performance_requirements": {
+    "balanced_field_length_ft": 2600,
+    "landing_field_length_ft": 2600,
+    "rate_of_climb_sea_level_fpm": 1200,
+    "rate_of_climb_ceiling_fpm": 100,
+    "climb_gradient_OEI": 0.024,
+    "climb_gradient_AEO": 0.05,
+    "stall_speed_requirement_kts": 85,
+    "_note": "Higher stall speed (no blown lift), longer field lengths"
+  },
+  "hybridization_profile": {
+    "description": "Electric power fraction for each mission segment (0.0=fuel only, 1.0=electric only)",
+    "_note": "Battery provides boost during high-power phases, turboprops handle cruise",
+    "warmup_takeoff": 0.3,
+    "climb": 0.2,
+    "cruise": 0.0,
+    "descent": 0.0,
+    "landing": 0.15
+  },
+  "mission_segments": {
+    "warmup_takeoff": {
+      "weight_fraction": 0.98,
+      "duration_hr": 0.05,
+      "duration_factor": 1.0
+    },
+    "climb": {
+      "weight_fraction": 0.995,
+      "duration_factor": 1.5
+    },
+    "cruise": {
+      "duration_factor": 10.0
+    },
+    "descent": {
+      "weight_fraction": 1.0,
+      "duration_hr": 0.17,
+      "duration_factor": 1.0
+    },
+    "landing": {
+      "weight_fraction": 0.995,
+      "duration_hr": 0.05,
+      "duration_factor": 0.5
+    }
+  },
+  "fuel_fractions": {
+    "reserve_fuel_fraction": 0.05,
+    "trapped_fuel_fraction": 0.01
+  },
+  "weight_iteration": {
+    "initial_TOGW_guess_lb": 12000,
+    "max_iterations": 100,
+    "convergence_tolerance_lb": 5.0,
+    "_note": "Higher initial guess (heavier wing without blown lift)"
+  },
+  "atmospheric_conditions": {
+    "density_sea_level_slug_ft3": 0.002377,
+    "thrust_lapse": {
+      "alpha_cruise": 0.75,
+      "alpha_ceiling": 0.5,
+      "alpha_turn": 0.75
+    }
+  },
+  "geometry": {
+    "fuselage": {
+      "diameter_ft": 7.0,
+      "length_to_diameter_ratio": 10
+    },
+    "wing": {
+      "dihedral_deg": 5,
+      "taper_ratio": 0.45,
+      "weight_fraction_TOGW": 0.23
+    },
+    "tail": {
+      "horizontal_volume_coefficient": 0.7,
+      "vertical_volume_coefficient": 0.04
+    },
+    "control_surfaces": {
+      "aileron_area_fraction": 0.15,
+      "flap_area_fraction": 0.25,
+      "elevator_area_fraction": 0.4,
+      "rudder_area_fraction": 0.35
+    }
+  },
+  "constraint_analysis": {
+    "climb_speed_multiplier": 1.2,
+    "stall_margin": 1.2
+  },
+  "constants": {
+    "gravity_ft_s2": 32.2,
+    "nm_to_ft": 6076.12,
+    "kts_to_fps": 1.68781
+  },
+  "power_profile_notes": {
+    "description": "Parallel hybrid per engine - GT + EM on same shaft",
+    "example_1000kW_Hp_0.3": {
+      "total_power": "1000 kW",
+      "per_engine": "500 kW (P_total / 2 engines)",
+      "per_engine_GT": "350 kW (70%)",
+      "per_engine_EM": "150 kW (30%)",
+      "total_GT": "700 kW",
+      "total_EM": "300 kW"
+    },
+    "typical_mission": {
+      "takeoff_Hp": 0.3,
+      "climb_Hp": 0.2,
+      "cruise_Hp": 0.0,
+      "landing_Hp": 0.15
+    },
+    "OEI_scenario": {
+      "description": "One engine inoperative",
+      "operating_engine": "Must provide full required power",
+      "battery_boost": "Can supplement single engine up to full power",
+      "critical_for": "FAR Part 23/25 certification"
+    }
+  },
+  "design_notes": {
+    "advantages": [
+      "OEI (One Engine Inoperative) capability - CRITICAL for certification",
+      "Dual independent engines provide redundancy",
+      "Near-baseline efficiency (+6.4% TOGW vs conventional)",
+      "Fuel-dominant energy system (F:B ratio 1.2:1)",
+      "Battery enables smaller turbines (sized for cruise, not peak)",
+      "Good range capability (300-600 nm)",
+      "Conventional certification path"
+    ],
+    "disadvantages": [
+      "No blown lift (55% larger wing than Config 1/2)",
+      "Two complete engine systems (higher weight)",
+      "Multi-engine certification complexity",
+      "Longer field lengths (4000 ft vs 3300 ft)"
+    ],
+    "best_for": "Certification-critical operations, regional transport, safety-first applications requiring OEI capability",
+    "comparison_to_others": {
+      "vs_config_1_series": "Simpler (no generator), OEI capable, similar range",
+      "vs_config_2_dual_dep": "Longer range, OEI capable, larger wing, fuel-based"
+    }
+  },
+  "component_sizing_example": {
+    "scenario": "1194 kW total, Hp = 0.2",
+    "per_engine_power": {
+      "GT": "477.6 kW \u00d7 2 = 955.2 kW total",
+      "EM": "119.4 kW \u00d7 2 = 238.8 kW total",
+      "total_per_engine": "597 kW"
+    },
+    "component_masses": {
+      "GT_per_engine": "278.3 lb \u00d7 2 = 556.6 lb",
+      "EM_per_engine": "66.7 lb \u00d7 2 = 133.4 lb",
+      "total_propulsion": "690.0 lb"
+    },
+    "battery": {
+      "peak_power": "503 kW (during takeoff)",
+      "energy": "169.8 kWh",
+      "mass": "1498 lb",
+      "C_rate": "2.96C",
+      "sizing_driver": "ENERGY (not power limited)"
+    }
+  }
+}
